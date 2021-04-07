@@ -4,6 +4,10 @@ const request = require('supertest');
 const app = require('../lib/app');
 const Dog = require('../lib/models/Dog');
 
+const twilio = require('../lib/utils/twilio');
+
+jest.mock('../lib/utils/twilio.js');
+
 
 describe('CRUD-lab-9 routes', () => {
   beforeEach(() => {
@@ -19,21 +23,16 @@ describe('CRUD-lab-9 routes', () => {
       breed: 'Chihuahua',
       ownerName: 'Shelby'
     })
+
+    twilio.sendSms.mockClear();
   });
 
   it('should post a new dog', async() => {
-    const res = await request(app)
+    await request(app)
     .post('/api/v1/dogs')
     .send(dog);
 
-    expect(res.body).toEqual({
-      id: '2',
-      dogName: 'Chloe',
-      age: 4,
-      foodAllergies: 'none', 
-      breed: 'Chihuahua',
-      ownerName: 'Shelby'
-    });
+    expect(twilio.sendSms).toBeCalledTimes(1);
   })
 
   it('should get all dogs', async() => {
